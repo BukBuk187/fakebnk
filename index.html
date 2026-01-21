@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Secure Payment Processing Portal</title>
+  <style>
+    :root { --bg:#0b1220; --card:#121b2f; --muted:#8aa0c7; --text:#e8f0ff; --accent:#4aa3ff; --warn:#ffd54a; --bad:#ff6b6b; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:linear-gradient(180deg,#070c16,#0b1220 60%); color:var(--text); }
+    header { padding:16px 18px; border-bottom:1px solid rgba(255,255,255,.08); background:rgba(18,27,47,.6); backdrop-filter: blur(8px); position:sticky; top:0; }
+    header .title { display:flex; align-items:center; gap:10px; }
+    .pill { font-size:12px; font-weight:800; letter-spacing:.06em; padding:2px 10px; border-radius:999px; background:rgba(74,163,255,.15); border:1px solid rgba(74,163,255,.35); color:var(--text); }
+    .banner { background:var(--warn); color:#111; padding:10px 18px; font-weight:800; }
+    .wrap { max-width: 980px; margin: 18px auto; padding: 0 16px 28px; }
+    .grid { display:grid; grid-template-columns: 1.3fr .7fr; gap:16px; }
+    @media (max-width:900px){ .grid{ grid-template-columns: 1fr; } }
+    .card { background:rgba(18,27,47,.9); border:1px solid rgba(255,255,255,.08); border-radius:16px; box-shadow: 0 16px 48px rgba(0,0,0,.35); overflow:hidden; }
+    .card h2, .card h3 { margin:0; }
+    .card .hd { padding:16px 16px 0; }
+    .card .bd { padding:16px; }
+    .muted { color:var(--muted); font-size:13px; line-height:1.35; }
+    label { display:block; font-size:12px; font-weight:800; margin:10px 0 6px; color:#cfe0ff; }
+    input, select, textarea {
+      width:100%; box-sizing:border-box;
+      padding: 10px 12px; border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(7,12,22,.65);
+      color: var(--text);
+      outline:none;
+    }
+    textarea { min-height: 84px; resize: vertical; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .col { flex:1 1 220px; }
+    .btnrow { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    button {
+      border:0; cursor:pointer; font-weight:900;
+      padding: 10px 14px; border-radius: 12px;
+      background: var(--accent); color:#071225;
+    }
+    button.secondary { background: rgba(255,255,255,.10); color:var(--text); border:1px solid rgba(255,255,255,.14); }
+    .progress {
+      width:100%; height:12px; border-radius:999px;
+      background: rgba(255,255,255,.10); overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .bar { height:100%; width:0%; background: linear-gradient(90deg, rgba(74,163,255,.9), rgba(122,92,255,.9)); transition: width .35s ease; }
+    .status { margin-top:10px; font-size:13px; color:#cfe0ff; }
+    .log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12px; background: rgba(7,12,22,.75);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px; padding: 12px;
+      max-height: 300px; overflow:auto;
+      white-space: pre-wrap;
+    }
+    .callout {
+      background: rgba(255,213,74,.12);
+      border:1px solid rgba(255,213,74,.35);
+      border-radius: 14px;
+      padding: 12px;
+      color:#ffe79a;
+    }
+    .danger {
+      background: rgba(255,107,107,.12);
+      border:1px solid rgba(255,107,107,.30);
+      border-radius: 14px;
+      padding: 12px;
+      color:#ffb1b1;
+    }
+    .tiny { font-size:12px; color:var(--muted); }
+    .step {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:900;
+      padding: 6px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .spinner {
+      width:14px; height:14px; border-radius:50%;
+      border:2px solid rgba(255,255,255,.25);
+      border-top-color: rgba(74,163,255,.95);
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .kbd { font-family: ui-monospace, monospace; padding:2px 6px; border-radius:8px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <div style="font-weight:1000;">Secure Payment Processing Portal</div>
+      <span class="pill">SECURE PORTAL</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <!-- Main -->
+      <div class="card">
+        <div class="hd">
+          <h2>Payment Authorization</h2>
+        </div>
+        <div class="bd">
+          <div class="row">
+            <div class="col">
+              <label>Transfer Type</label>
+              <select id="type">
+                <option>Instant Transfer</option>
+                <option>Priority Transfer</option>
+                <option>International Transfer</option>
+                <option>Merchant Refund</option>
+              </select>
+            </div>
+            <div class="col">
+              <label>Region</label>
+              <select id="region">
+                <option>US</option>
+                <option>CA</option>
+                <option>EU</option>
+                <option>UK</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Reference Note (optional — NO personal info)</label>
+          <textarea id="note" placeholder="Example: 'Invoice dispute', 'shipping confirmation'..."></textarea>
+
+          <div id="guardMsg" class="danger" style="display:none; margin-top:12px;"></div>
+
+          <div class="btnrow">
+            <button id="startBtn">Start Authorization</button>
+            <button class="secondary" id="resetBtn" type="button">Reset</button>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="step" id="stepPill"><span class="spinner" style="display:none;" id="spin"></span><span id="stepText">Idle</span></div>
+            <div style="margin-top:10px;" class="progress"><div class="bar" id="bar"></div></div>
+            <div class="status" id="status">Waiting to begin.</div>
+          </div>
+
+          <div style="margin-top:16px;" class="callout">
+            Tip: if asked for a “code,” provide the <span class="kbd">Session Code</span> shown on the right.
+          </div>
+        </div>
+      </div>
+
+      <!-- Side -->
+      <div class="card">
+        <div class="hd">
+          <h3>Session Panel</h3>
+          <div class="muted" style="margin-top:6px;">
+            Client-side only. Nothing is transmitted or stored.
+          </div>
+        </div>
+        <div class="bd">
+          <div class="row">
+            <div class="col">
+              <label>Session Code</label>
+              <input id="session" readonly />
+              <div class="tiny" style="margin-top:8px;">You can screenshot this for your records.</div>
+            </div>
+          </div>
+
+          <label>Verification Prompts</label>
+          <div class="log" id="log">No activity yet.</div>
+
+          <div class="tiny" style="margin-top:10px;">
+            Shortcut: press <span class="kbd">R</span> to reset.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- Safety guards: reject sensitive patterns if pasted ---
+  function looksLikeSSN(t){ return /\b\d{3}-\d{2}-\d{4}\b/.test(t) || /\b\d{9}\b/.test(t); }
+  function looksLikeCard(t){
+    const m = t.match(/(?:\b\d[ -]?){13,19}\b/g);
+    return !!m;
+  }
+  function looksLikePassword(t){ return /(password|passcode|pin\s*:|otp|one[-\s]?time\s*code)/i.test(t); }
+  function guard(t){
+    if(looksLikeSSN(t)) return "Possible SSN detected. Remove it.";
+    if(looksLikeCard(t)) return "Possible card number detected. Remove it.";
+    if(looksLikePassword(t)) return "Possible password/PIN/OTP detected. Remove it.";
+    return null;
+  }
+
+  // --- UI helpers ---
+  const el = (id)=>document.getElementById(id);
+  const bar = el('bar'), statusEl = el('status'), logEl = el('log'), stepText = el('stepText'), spin = el('spin');
+  const guardMsg = el('guardMsg');
+  const sessionEl = el('session');
+
+  function rand(n){ return Math.floor(Math.random()*n); }
+  function now(){ return new Date().toISOString(); }
+  function setProgress(p){ bar.style.width = Math.max(0, Math.min(100, p)) + "%"; }
+  function setStep(text, spinning){
+    stepText.textContent = text;
+    spin.style.display = spinning ? "inline-block" : "none";
+  }
+  function log(line){
+    const prefix = `[${now()}] `;
+    if(logEl.textContent === "No activity yet.") logEl.textContent = "";
+    logEl.textContent += prefix + line + "\n";
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function makeSession(){
+    const s = Math.random().toString(36).slice(2, 6).toUpperCase() + "-" +
+              Math.random().toString(36).slice(2, 6).toUpperCase() + "-" +
+              Math.random().toString(36).slice(2, 6).toUpperCase();
+    sessionEl.value = s;
+  }
+
+  // --- Time-waster flow ---
+  let running = false;
+  let timer = null;
+
+  const steps = [
+    { name:"Initializing secure channel", min:1200, max:2600, p:[4,14], msgs:[
+      "Negotiating TLS handshake…",
+      "Selecting compliance profile…",
+      "Loading regional routing table…",
+      "Synchronizing ledger clock…"
+    ]},
+    { name:"Risk assessment", min:1800, max:3400, p:[15,28], msgs:[
+      "Flagging high-risk keywords…",
+      "Cross-checking merchant fingerprint…",
+      "Running anomaly scan (v2)…",
+      "Verifying transaction entropy…"
+    ]},
+    { name:"Identity verification", min:2000, max:4200, p:[29,48], msgs:[
+      "Verifying device integrity…",
+      "Checking session reputation…",
+      "Performing liveness check…",
+      "Validating regional compliance…"
+    ]},
+    { name:"Funds availability", min:1600, max:3000, p:[49,62], msgs:[
+      "Querying settlement rails…",
+      "Checking availability window…",
+      "Confirming transfer slot…",
+      "Locking temporary authorization…"
+    ]},
+    { name:"Final authorization", min:2200, max:5200, p:[63,86], msgs:[
+      "Applying fraud-prevention hold…",
+      "Confirming beneficiary routing…",
+      "Running final checksum…",
+      "Preparing confirmation packet…"
+    ]}
+  ];
+
+  const errors = [
+    "Verification failed: session out-of-sync. Re-attempt required.",
+    "Compliance gateway timeout. Retrying verification stage.",
+    "Risk engine returned: 'manual review required' (auto-resolving).",
+    "Routing mismatch detected. Rebuilding transfer pathway.",
+    "Authorization token expired. Renewing token and restarting checks.",
+    "Ledger clock drift detected. Re-synchronizing…",
+    "CAPTCHA loop engaged: automated behavior suspected.",
+    "Queue position changed. Revalidating transfer slot."
+  ];
+
+  const prompts = [
+    "Please confirm you are not a robot by waiting for the next screen to load.",
+    "Please re-confirm the session code to continue (copy/paste it).",
+    "A security pause has been applied. Do not refresh this page.",
+    "Processing… If this takes longer than 2 minutes, remain on this screen.",
+    "Manual review in progress. Please stand by.",
+    "Please wait while final checks complete."
+  ];
+
+  function randomDelay(min,max){ return min + rand(max-min+1); }
+
+  function stopFlow(){
+    running = false;
+    if(timer) clearTimeout(timer);
+    timer = null;
+    setStep("Idle", false);
+    setProgress(0);
+    statusEl.textContent = "Waiting to begin.";
+  }
+
+  function loopFlow(){
+    if(!running) return;
+
+    const stage = steps[rand(steps.length)];
+    const delay = randomDelay(stage.min, stage.max);
+    const p = stage.p[0] + rand(stage.p[1]-stage.p[0]+1);
+
+    setStep(stage.name, true);
+    setProgress(p);
+    const msg = stage.msgs[rand(stage.msgs.length)];
+    statusEl.textContent = msg;
+    log(`${stage.name}: ${msg}`);
+
+    timer = setTimeout(() => {
+      if(!running) return;
+
+      const roll = Math.random();
+      if(roll < 0.35){
+        const e = errors[rand(errors.length)];
+        setStep("System notice", true);
+        statusEl.textContent = e;
+        log(`SYSTEM: ${e}`);
+
+        const back = Math.max(5, p - (10 + rand(20)));
+        setProgress(back);
+
+        if(Math.random() < 0.6){
+          const pr = prompts[rand(prompts.length)];
+          log(`PROMPT: ${pr}`);
+          statusEl.textContent = pr;
+        }
+
+        timer = setTimeout(loopFlow, randomDelay(1400, 2800));
+        return;
+      }
+
+      if(p > 82 && Math.random() < 0.8){
+        const e = "Authorization completed, but confirmation could not be delivered. Restarting secure channel…";
+        setStep("Restart required", true);
+        statusEl.textContent = e;
+        log(`SYSTEM: ${e}`);
+        setProgress(6 + rand(10));
+        timer = setTimeout(loopFlow, randomDelay(1400, 2600));
+        return;
+      }
+
+      timer = setTimeout(loopFlow, randomDelay(900, 1800));
+    }, delay);
+  }
+
+  function start(){
+    const note = el('note').value || "";
+    const t = [el('type').value, el('region').value, note].join(" | ");
+    const issue = guard(t);
+    if(issue){
+      guardMsg.style.display = "block";
+      guardMsg.textContent = "REJECTED: " + issue;
+      return;
+    }
+    guardMsg.style.display = "none";
+
+    if(!sessionEl.value) makeSession();
+    running = true;
+    log(`SESSION STARTED: ${sessionEl.value}`);
+    setStep("Initializing secure channel", true);
+    statusEl.textContent = "Starting workflow…";
+    setProgress(3 + rand(6));
+    if(timer) clearTimeout(timer);
+    timer = setTimeout(loopFlow, randomDelay(900, 1400));
+  }
+
+  el('startBtn').addEventListener('click', (e)=>{ e.preventDefault(); if(!running) start(); });
+  el('resetBtn').addEventListener('click', (e)=>{
+    e.preventDefault();
+    if(timer) clearTimeout(timer);
+    timer = null;
+    running = false;
+    el('note').value = "";
+    el('type').selectedIndex = 0;
+    el('region').selectedIndex = 0;
+    makeSession();
+    logEl.textContent = "No activity yet.";
+    setStep("Idle", false);
+    setProgress(0);
+    statusEl.textContent = "Waiting to begin.";
+    guardMsg.style.display = "none";
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key.toLowerCase()==='r'){
+      el('resetBtn').click();
+    }
+  });
+
+  // init
+  makeSession();
+</script>
+</body>
+</html>
